@@ -74,7 +74,7 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("CNKI検索");
 
-        txt_1_sel.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        txt_1_sel.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "主题", "关键词", "篇名", "摘要", "全文", "被引文献", "中图分类号" }));
 
         btnSearch.setText("検索");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
