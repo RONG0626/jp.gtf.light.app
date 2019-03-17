@@ -5,8 +5,6 @@
  */
 package jp.gtf.light.app.cnki.service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,9 +37,16 @@ import org.jsoup.select.Elements;
  */
 public class CNKISearchManager {
 
-    static final String SCDB_ENTRY_URL = "http://kns.cnki.net/kns/brief/result.aspx?dbprefix=SCDB&crossDbcodes=CJFQ,CDFD,CMFD,CPFD,IPFD,CCND,CCJD";
-    static final String SCDB_SEARCH_URL = "http://kns.cnki.net/kns/request/SearchHandler.ashx";
+    public enum DBCATELOG {
+        SCDB,
+        CJFQ,
+        CDMD
+    }
+
+    static final String ENTRY_URL = "http://kns.cnki.net/kns/brief/result.aspx?dbprefix=SCDB&crossDbcodes=CJFQ,CDFD,CMFD,CPFD,IPFD,CCND,CCJD";
+    static final String SEARCH_URL = "http://kns.cnki.net/kns/request/SearchHandler.ashx";
     static final String SCDB_PAGE_FIRST = "http://kns.cnki.net/kns/brief/brief.aspx?RecordsPerPage=50&pagename=";
+
     static final int RECORD_PRE_PAGE = 50;
 
     @Getter
@@ -55,16 +60,12 @@ public class CNKISearchManager {
     /**
      * 指定されたキーワードで、文献を検索する
      *
-     * @param subjectKeyword タイトルキーワード
+     * @param keyType 検索キータイプ
+     * @param keyValue 検索キー値
      * @return 結果
      */
-    public static List<DocReference> search(String subjectKeyword) {
+    public static List<DocReference> search(String keyType, String keyValue) {
         List<DocReference> totalRecords = new ArrayList<>();
-        try {
-            System.out.println(URLEncoder.encode("中国学术文献网络出版总库", "UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(CNKISearchManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
 
         HttpClient httpClient = new DefaultHttpClient();
         CookieStore cookieStore = new BasicCookieStore();
@@ -73,16 +74,31 @@ public class CNKISearchManager {
 
         // 1. エントリ画面を遷移、COOKIE＆SESSION情報を設定する
         try {
-            sendRequest(httpClient, httpContext, RequestBuilder.get(SCDB_ENTRY_URL).build());
+            sendRequest(httpClient, httpContext, RequestBuilder.get(ENTRY_URL).build());
         } catch (Exception ex) {
             Logger.getLogger(CNKISearchManager.class.getName()).log(Level.SEVERE, null, ex);
             return totalRecords;
         }
+        try {
+            _search(httpClient, httpContext, keyType, keyValue, totalRecords);
+        } catch (Exception ex) {
+            Logger.getLogger(CNKISearchManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return totalRecords;
+    }
+
+    private static void _search(
+            HttpClient httpClient,
+            HttpContext httpContext,
+            String keyType,
+            String keyValue,
+            List<DocReference> totalRecords) throws Exception {
         String firstPage = null;
         try {
             // 2.リクエストを投げ、初期検索画面を設定する
             firstPage = sendRequest(httpClient, httpContext,
-                    RequestBuilder.post(SCDB_SEARCH_URL)
+                    RequestBuilder.post(SEARCH_URL)
                             .setCharset(Charset.forName("UTF-8"))
                             .addParameter("action", "")
                             .addParameter("NaviCode", "*")
@@ -93,43 +109,39 @@ public class CNKISearchManager {
                             .addParameter("DbCatalog", "中国学术文献网络出版总库")
                             .addParameter("ConfigFile", "SCDB.xml")
                             .addParameter("db_opt", "CJFQ,CDFD,CMFD,CPFD,IPFD,CCND,CCJD")
-                            .addParameter("txt_1_sel", "SU$%=|")
-                            .addParameter("txt_1_value1", subjectKeyword)
+                            .addParameter("txt_1_sel", keyType)
+                            .addParameter("txt_1_value1", keyValue)
                             .addParameter("txt_1_relation", "#CNKI_AND")
                             .addParameter("txt_1_special1", "=")
                             .addParameter("his", "0")
                             .build());
+
         } catch (Exception ex) {
             Logger.getLogger(CNKISearchManager.class.getName()).log(Level.SEVERE, null, ex);
             // 継続不可エラー
         }
-        try {
-            // 3.最初の画面を検索
-            String firstPageContent = sendRequest(httpClient, httpContext, RequestBuilder.get(
+        // 3.最初の画面を検索
+        String firstPageContent = sendRequest(httpClient, httpContext, RequestBuilder.get(
+                new StringBuilder()
+                        .append(SCDB_PAGE_FIRST)
+                        .append(firstPage)
+                        .toString()).build());
+        // 4.最初検索結果を分析する
+        RecordMeta pageMeta = parseFirstPage(firstPageContent);
+        for (int i = 0; i < pageMeta.pages; ++i) {
+            // 5.各ページの情報を取得する
+            List<DocReference> records = parseEveryPage(sendRequest(httpClient, httpContext, RequestBuilder.get(
                     new StringBuilder()
                             .append(SCDB_PAGE_FIRST)
                             .append(firstPage)
-                            .toString()).build());
-            // 4.最初検索結果を分析する
-            RecordMeta pageMeta = parseFirstPage(firstPageContent);
-            for (int i = 0; i < pageMeta.pages; ++i) {
-                // 5.各ページの情報を取得する
-                List<DocReference> records = parseEveryPage(sendRequest(httpClient, httpContext, RequestBuilder.get(
-                        new StringBuilder()
-                                .append(SCDB_PAGE_FIRST)
-                                .append(firstPage)
-                                .append("&")
-                                .append("curpage=")
-                                .append(i + 1)
-                                .toString()).build()));
-                if (!records.isEmpty()) {
-                    totalRecords.addAll(records);
-                }
+                            .append("&")
+                            .append("curpage=")
+                            .append(i + 1)
+                            .toString()).build()));
+            if (!records.isEmpty()) {
+                totalRecords.addAll(records);
             }
-        } catch (Exception ex) {
-            Logger.getLogger(CNKISearchManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return totalRecords;
     }
 
     private static String sendRequest(HttpClient httpClient, HttpContext httpContext, HttpUriRequest method) throws Exception {

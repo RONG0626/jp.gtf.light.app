@@ -7,6 +7,8 @@ package jp.gtf.light.app.cnki;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import jp.gtf.kernel.lang.template.MemoryTemplate;
 import jp.gtf.kernel.swing.utils.UTable;
 import jp.gtf.light.app.cnki.object.DocReference;
 import jp.gtf.light.app.cnki.service.CNKISearchManager;
@@ -51,22 +53,14 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
         tblSearchResult = new javax.swing.JTable();
         textFilterResult = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
-        btnSaveResult = new javax.swing.JButton();
-        selPreSearchResults = new javax.swing.JComboBox<>();
+        btnCreateTxtDocRef = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        textDocRefOut = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         textTemplate = new javax.swing.JTextArea();
         jLabel4 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jLabel3 = new javax.swing.JLabel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
-        selDBCategory = new javax.swing.JComboBox<>();
-        jLabel5 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
@@ -74,7 +68,7 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("CNKI検索");
 
-        txt_1_sel.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "主题", "关键词", "篇名", "摘要", "全文", "被引文献", "中图分类号" }));
+        txt_1_sel.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "主题" }));
 
         btnSearch.setText("検索");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
@@ -88,7 +82,7 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "#", "题名", "作者", "来源", "发表时间"
+                "#", "题名", "来源", "作者", "发表时间"
             }
         ) {
             Class[] types = new Class [] {
@@ -110,21 +104,26 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
         if (tblSearchResult.getColumnModel().getColumnCount() > 0) {
             tblSearchResult.getColumnModel().getColumn(0).setMinWidth(35);
             tblSearchResult.getColumnModel().getColumn(0).setMaxWidth(35);
-            tblSearchResult.getColumnModel().getColumn(2).setMinWidth(120);
-            tblSearchResult.getColumnModel().getColumn(2).setMaxWidth(120);
-            tblSearchResult.getColumnModel().getColumn(3).setMinWidth(150);
-            tblSearchResult.getColumnModel().getColumn(3).setMaxWidth(150);
+            tblSearchResult.getColumnModel().getColumn(2).setMinWidth(150);
+            tblSearchResult.getColumnModel().getColumn(2).setMaxWidth(150);
+            tblSearchResult.getColumnModel().getColumn(3).setMinWidth(120);
+            tblSearchResult.getColumnModel().getColumn(3).setMaxWidth(120);
             tblSearchResult.getColumnModel().getColumn(4).setMinWidth(100);
             tblSearchResult.getColumnModel().getColumn(4).setMaxWidth(100);
         }
 
         jLabel1.setText("Filter->");
 
-        jButton2.setText("参考文献作成");
+        btnCreateTxtDocRef.setText("参考文献作成");
+        btnCreateTxtDocRef.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateTxtDocRefActionPerformed(evt);
+            }
+        });
 
-        btnSaveResult.setText("検索結果をロード");
-
-        selPreSearchResults.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        textDocRefOut.setColumns(20);
+        textDocRefOut.setRows(5);
+        jScrollPane2.setViewportView(textDocRefOut);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -139,11 +138,8 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(textFilterResult, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(selPreSearchResults, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSaveResult)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2)))
+                        .addComponent(btnCreateTxtDocRef))
+                    .addComponent(jScrollPane2))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -153,11 +149,11 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(textFilterResult, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
-                    .addComponent(jButton2)
-                    .addComponent(btnSaveResult)
-                    .addComponent(selPreSearchResults, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnCreateTxtDocRef))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 376, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -165,6 +161,7 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
 
         textTemplate.setColumns(20);
         textTemplate.setRows(5);
+        textTemplate.setText("${index}、${author}:《${subject}》,《${from}》，${publishedDate}。");
         jScrollPane4.setViewportView(textTemplate);
 
         jLabel4.setText("参考文献のフォーマット設定");
@@ -188,87 +185,13 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
                 .addGap(8, 8, 8)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 496, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(401, Short.MAX_VALUE))
         );
 
         jTabbedPane2.addTab("設定", jPanel3);
 
-        jLabel2.setText("COOKIE");
-
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "KEY", "VALUE"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, false
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jScrollPane2.setViewportView(jTable1);
-
-        jLabel3.setText("Process");
-
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "#", "Title 2", "Title 3", "Title 4"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, true, false, true
-            };
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jScrollPane3.setViewportView(jTable2);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 640, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addGap(0, 0, Short.MAX_VALUE))))
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addComponent(jScrollPane3))
-                .addContainerGap())
-        );
-
-        jTabbedPane2.addTab("開発用", jPanel2);
-
-        selDBCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "文献", "期刊", "博硕士" }));
-
-        jLabel5.setText("-->");
+        jLabel2.setText("←時間かかる場合があります。");
 
         jMenu1.setText("File");
         jMenuBar1.add(jMenu1);
@@ -287,16 +210,14 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTabbedPane2)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(selDBCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txt_1_sel, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txt_1_value1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSearch)
-                        .addGap(352, 352, 352)))
+                        .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel2)
+                        .addGap(276, 276, 276)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -307,8 +228,7 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
                     .addComponent(txt_1_value1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_1_sel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSearch)
-                    .addComponent(selDBCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5))
+                    .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jTabbedPane2)
                 .addContainerGap())
@@ -318,7 +238,11 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        List<DocReference> datas = CNKISearchManager.search(txt_1_value1.getText());
+        String keyType = "SU$%=|";
+
+        List<DocReference> datas = CNKISearchManager.search(
+                keyType,
+                txt_1_value1.getText());
         // display the data in table
         UTable.clear(tblSearchResult);
         datas.forEach((data) -> {
@@ -331,6 +255,25 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
         // save the data to excel
         CNKISearchManager.saveToExcel(datas, "workspace/" + txt_1_value1.getText() + ".xlsx");
     }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnCreateTxtDocRefActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateTxtDocRefActionPerformed
+        StringBuilder sb = new StringBuilder();
+        AtomicInteger index = new AtomicInteger(1);
+        UTable.forEach(tblSearchResult, (Object[] vs) -> {
+            if (Boolean.class.cast(vs[0])) {
+                // ${index}、${author}:《${subject}》,《${from}》，${publishedDate}。
+                MemoryTemplate template = new MemoryTemplate(textTemplate.getText());
+                template.addAttribute("index", index.getAndIncrement());
+                template.addAttribute("subject", vs[1]);
+                template.addAttribute("from", vs[2]);
+                template.addAttribute("author", vs[3]);
+                template.addAttribute("publishedDate", vs[4]);
+                sb.append(template.render());
+                sb.append(System.getProperty("line.separator"));
+            }
+        });
+        textDocRefOut.setText(sb.toString());
+    }//GEN-LAST:event_btnCreateTxtDocRefActionPerformed
 
     /**
      * @param args the command line arguments
@@ -368,30 +311,22 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnSaveResult;
+    private javax.swing.JButton btnCreateTxtDocRef;
     private javax.swing.JButton btnSearch;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTabbedPane jTabbedPane2;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
-    private javax.swing.JComboBox<String> selDBCategory;
-    private javax.swing.JComboBox<String> selPreSearchResults;
     private javax.swing.JTable tblSearchResult;
+    private javax.swing.JTextArea textDocRefOut;
     private javax.swing.JTextField textFilterResult;
     private javax.swing.JTextArea textTemplate;
     private javax.swing.JComboBox<String> txt_1_sel;
