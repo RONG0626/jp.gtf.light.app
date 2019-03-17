@@ -5,7 +5,10 @@
  */
 package jp.gtf.light.app.cnki;
 
+import java.io.File;
+import java.util.List;
 import jp.gtf.kernel.swing.utils.UTable;
+import jp.gtf.light.app.cnki.object.DocReference;
 import jp.gtf.light.app.cnki.service.CNKISearchManager;
 
 /**
@@ -22,7 +25,11 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
         initComponents();
         // hook the value
         UTable.addFilter(tblSearchResult, textFilterResult);
-
+        // ワックスペース存在有無チェック、存在しない場合を作成する
+        File workspace = new File("./workspace");
+        if (!workspace.exists()) {
+            workspace.mkdirs();
+        }
         // add database catalog
     }
 
@@ -81,14 +88,14 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "#", "题名", "作者", "来源", "发表时间", "数据库"
+                "#", "题名", "作者", "来源", "发表时间"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false, false, false, false
+                true, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -109,8 +116,6 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
             tblSearchResult.getColumnModel().getColumn(3).setMaxWidth(150);
             tblSearchResult.getColumnModel().getColumn(4).setMinWidth(100);
             tblSearchResult.getColumnModel().getColumn(4).setMaxWidth(100);
-            tblSearchResult.getColumnModel().getColumn(5).setMinWidth(100);
-            tblSearchResult.getColumnModel().getColumn(5).setMaxWidth(100);
         }
 
         jLabel1.setText("Filter->");
@@ -313,7 +318,18 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
-        CNKISearchManager.search(txt_1_value1.getText());
+        List<DocReference> datas = CNKISearchManager.search(txt_1_value1.getText());
+        // display the data in table
+        UTable.clear(tblSearchResult);
+        datas.forEach((data) -> {
+            UTable.append(tblSearchResult, false,
+                    data.getSubject(),
+                    data.getFrom(),
+                    data.getAuthor(),
+                    data.getPublishedDate());
+        });
+        // save the data to excel
+        CNKISearchManager.saveToExcel(datas, "workspace/" + txt_1_value1.getText() + ".xlsx");
     }//GEN-LAST:event_btnSearchActionPerformed
 
     /**

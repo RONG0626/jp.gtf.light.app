@@ -28,7 +28,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>jp.gtf.app.vps.VPSStart</mainClass>
+                            <mainClass>jp.gtf.light.app.cnki.CNKIQuoteFrame</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
