@@ -6,6 +6,7 @@
 package jp.gtf.light.app.cnki;
 
 import jp.gtf.kernel.swing.utils.UTable;
+import jp.gtf.light.app.cnki.service.CNKISearchManager;
 
 /**
  * CNKI検索結果を参考文献に変換する
@@ -23,10 +24,6 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
         UTable.addFilter(tblSearchResult, textFilterResult);
 
         // add database catalog
-        selDBCategory.addItem("文献");
-        selDBCategory.addItem("期刊");
-        selDBCategory.addItem("博硕士");
-
     }
 
     /**
@@ -40,8 +37,6 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
 
         txt_1_value1 = new javax.swing.JTextField();
         txt_1_sel = new javax.swing.JComboBox<>();
-        au_1_sel = new javax.swing.JComboBox<>();
-        au_1_value1 = new javax.swing.JTextField();
         btnSearch = new javax.swing.JButton();
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
@@ -74,9 +69,12 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
 
         txt_1_sel.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        au_1_sel.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
         btnSearch.setText("検索");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         tblSearchResult.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -263,6 +261,8 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
 
         jTabbedPane2.addTab("開発用", jPanel2);
 
+        selDBCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "文献", "期刊", "博硕士" }));
+
         jLabel5.setText("-->");
 
         jMenu1.setText("File");
@@ -290,11 +290,8 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txt_1_value1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(au_1_sel, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(au_1_value1, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSearch)))
+                        .addComponent(btnSearch)
+                        .addGap(352, 352, 352)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -304,8 +301,6 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txt_1_value1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txt_1_sel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(au_1_sel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(au_1_value1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSearch)
                     .addComponent(selDBCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5))
@@ -316,6 +311,10 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        CNKISearchManager.search(txt_1_value1.getText());
+    }//GEN-LAST:event_btnSearchActionPerformed
 
     /**
      * @param args the command line arguments
@@ -353,8 +352,6 @@ public class CNKIQuoteFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> au_1_sel;
-    private javax.swing.JTextField au_1_value1;
     private javax.swing.JButton btnSaveResult;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton jButton2;
